@@ -21,7 +21,7 @@ class Glossary {
         return Math.max((int) Math.ceil(Math.log(x) / Math.log(2) / 8), 1);
     }
 
-    private static byte[] left_encode(long x) {
+    static byte[] left_encode(long x) {
         int n = getSmallestPositiveN(x);
         byte[] O = new byte[n + 1];
         O[0] = (byte) n;
@@ -31,7 +31,7 @@ class Glossary {
         return O;
     }
 
-    private static byte[] right_encode(long x) {
+    static byte[] right_encode(long x) {
         int n = getSmallestPositiveN(x);
         byte[] O = new byte[n + 1];
         O[n] = (byte) n;
@@ -41,16 +41,23 @@ class Glossary {
         return O;
     }
 
-    private static byte[] array_concatenation(byte[] a1, byte[] a2) {
-        byte[] result = new byte[a1.length + a2.length];
-        System.arraycopy(a1, 0, result, 0, a1.length);
-        System.arraycopy(a2, 0, result, a1.length, a2.length);
+    static byte[] array_concatenation(byte[]... arrays) {
+        int totalLen = 0;
+        for (byte[] theArray : arrays) {
+            totalLen += theArray.length;
+        }
+        byte[] result = new byte[totalLen];
+        int copyIndex = 0;
+        for (byte[] theArray : arrays) {
+            System.arraycopy(theArray, 0, result, copyIndex, theArray.length);
+            copyIndex += theArray.length;
+        }
         return result;
     }
 
-    private static byte[] encode_string(String plaintText) {
-        assert plaintText.length() <= Math.pow(2, 2040);
-        return array_concatenation(left_encode(plaintText.length()), plaintText.getBytes());
+    static byte[] encode_string(String S) {
+        assert S.length() <= Math.pow(2, 2040);
+        return array_concatenation(left_encode(S.length()), S.getBytes());
     }
 
     /**
@@ -60,7 +67,7 @@ class Glossary {
      * @param w the encoding factor (the output length must be a multiple of w)
      * @return the byte-padded byte array X with encoding factor w.
      */
-    private static byte[] bytepad(byte[] X, int w) {
+    static byte[] bytepad(byte[] X, int w) {
         // Validity Conditions: w > 0
         assert w > 0;
         // 1. z = left_encode(w) || X.
@@ -89,7 +96,7 @@ class Glossary {
      * @param b a non-negative integer that denote a specific position in a bit string X
      * @return a substring from the bit string X containing the values at bit positions a, a+1, ..., b−1, inclusive
      */
-    private static byte[] substring(byte[] X, int a, int b) {
+    static byte[] substring(byte[] X, int a, int b) {
         if (a >= b || a >= X.length) {
             return new byte[0];
         } else if (b <= X.length) {

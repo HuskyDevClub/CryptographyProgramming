@@ -1,8 +1,18 @@
-public class Shake extends Glossary {
+public class cShake {
 
-    /**
-     * Switch from absorbing to extensible squeezing.
-     */
+    static byte[] cSHAKE256(byte[] X, int length, String N, String S) {
+        assert N.length() <= Math.pow(2, 2040) && S.length() <= Math.pow(2, 2040);
+        if (N.equals("") && S.equals("")) {
+            return SHAKE.SHAKE256(X, length);
+        } else {
+            byte[] bytePadBytes = Glossary.bytepad(Glossary.array_concatenation(Glossary.encode_string(N), Glossary.encode_string(S)), 136);
+            byte[] after = Glossary.array_concatenation(X, new byte[]{(byte) 0x00});
+            return KECCAK.KECCAK512(Glossary.array_concatenation(bytePadBytes, after), length);
+        }
+    }
+
+    /*
+     // Switch from absorbing to extensible squeezing.
     public void xof() {
 
         if (kmac) {
@@ -29,4 +39,5 @@ public class Shake extends Glossary {
 
     public void out(byte[] val, int i) {
     }
+    */
 }
