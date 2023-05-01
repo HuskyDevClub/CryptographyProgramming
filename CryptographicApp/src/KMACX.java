@@ -7,7 +7,7 @@ public class KMACX {
                     "output length (in bits) must be a multiple of 8");
         }
         byte[] val = new byte[L >>> 3];
-        SHAKE shake = new SHAKE();
+        Shake shake = new Shake();
         shake.kinit256(K, S);
         shake.update(X, X.length);
         shake.xof();
