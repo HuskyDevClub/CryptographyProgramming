@@ -11,14 +11,37 @@ class Glossary {
 
     @Test
     private static void test() {
-        assertArrayEquals(encode_string(""), new byte[]{(byte) 0x1, (byte) 0x0});
-        assertArrayEquals(left_encode(0), new byte[]{(byte) 0x1, (byte) 0x0});
-        assertArrayEquals(right_encode(0), new byte[]{(byte) 0x0, (byte) 0x1});
+        assertArrayEquals(
+                array_concatenation(
+                        new byte[]{(byte) 0x01, (byte) 0x02},
+                        new byte[]{(byte) 0x03, (byte) 0x04, (byte) 0x05},
+                        new byte[]{(byte) 0x06}
+                ),
+                new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05, (byte) 0x06}
+        );
+        assertArrayEquals(new byte[]{(byte) 0x01, (byte) 0x00}, encode_string(""));
+        assertArrayEquals(
+                new byte[]{
+                        (byte) 0x01, (byte) 0x78, (byte) 0x45, (byte) 0x6D, (byte) 0x61, (byte) 0x69, (byte) 0x6C, (byte) 0x20,
+                        (byte) 0x53, (byte) 0x69, (byte) 0x67, (byte) 0x6E, (byte) 0x61, (byte) 0x74, (byte) 0x75, (byte) 0x72, (byte) 0x65
+                },
+                encode_string("Email Signature")
+        );
+        assertArrayEquals(new byte[]{(byte) 0x01, (byte) 0x00}, left_encode(0));
+        assertArrayEquals(new byte[]{(byte) 0x01, (byte) 0x7e}, left_encode(126));
+        assertArrayEquals(new byte[]{(byte) 0x01, (byte) 0xff}, left_encode(255));
+        assertArrayEquals(new byte[]{(byte) 0x02, (byte) 0x00, (byte) 0x01}, left_encode(256));
+        assertArrayEquals(new byte[]{(byte) 0x02, (byte) 0x01, (byte) 0x01}, left_encode(257));
+        assertArrayEquals(new byte[]{(byte) 0x00, (byte) 0x01}, right_encode(0));
+        assertArrayEquals(new byte[]{(byte) 0x7e, (byte) 0x01}, right_encode(126));
+        assertArrayEquals(new byte[]{(byte) 0xff, (byte) 0x01}, right_encode(255));
+        assertArrayEquals(new byte[]{(byte) 0x00, (byte) 0x01, (byte) 0x02}, right_encode(256));
+        assertArrayEquals(new byte[]{(byte) 0x01, (byte) 0x01, (byte) 0x02}, right_encode(257));
     }
 
     private static int getSmallestPositiveN(long x) {
         assert x >= 0 && x <= Math.pow(2, 2040);
-        return Math.max((int) Math.ceil(Math.log(x) / Math.log(2) / 8), 1);
+        return Math.max((int) Math.ceil(Math.log(x + 1) / Math.log(2) / 8), 1);
     }
 
     static byte[] left_encode(long x) {
@@ -26,7 +49,8 @@ class Glossary {
         byte[] O = new byte[n + 1];
         O[0] = (byte) n;
         for (int i = 1; i <= n; i++) {
-            O[i] = (byte) (x >> (8 * (n - i)));
+            O[i] = (byte) (x % 256);
+            x /= 256;
         }
         return O;
     }
@@ -36,7 +60,8 @@ class Glossary {
         byte[] O = new byte[n + 1];
         O[n] = (byte) n;
         for (int i = 0; i < n; i++) {
-            O[i] = (byte) (x >> (8 * (n - i - 1)));
+            O[i] = (byte) (x % 256);
+            x /= 256;
         }
         return O;
     }
@@ -56,8 +81,12 @@ class Glossary {
     }
 
     static byte[] encode_string(String S) {
-        assert S.length() <= Math.pow(2, 2040);
-        return array_concatenation(left_encode(S.length()), S.getBytes());
+        return encode_string(S.getBytes());
+    }
+
+    static byte[] encode_string(byte[] S) {
+        assert S.length <= Math.pow(2, 2040);
+        return array_concatenation(left_encode(S.length * 8L), S);
     }
 
     /**
