@@ -1,16 +1,14 @@
 import org.junit.jupiter.api.Test;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class Glossary {
-    public static void main(String[] args) {
-        test();
-    }
 
     @Test
-    private static void test() {
+    static void test() {
         assertArrayEquals(
                 array_concatenation(
                         new byte[]{(byte) 0x01, (byte) 0x02},
@@ -26,6 +24,14 @@ class Glossary {
                         (byte) 0x53, (byte) 0x69, (byte) 0x67, (byte) 0x6E, (byte) 0x61, (byte) 0x74, (byte) 0x75, (byte) 0x72, (byte) 0x65
                 },
                 encode_string("Email Signature")
+        );
+        assertArrayEquals(
+                new byte[]{
+                        (byte) 0x01, (byte) 0xa8, (byte) 0x4d, (byte) 0x79, (byte) 0x20, (byte) 0x54, (byte) 0x61, (byte) 0x67,
+                        (byte) 0x67, (byte) 0x65, (byte) 0x64, (byte) 0x20, (byte) 0x41, (byte) 0x70, (byte) 0x70, (byte) 0x6c,
+                        (byte) 0x69, (byte) 0x63, (byte) 0x61, (byte) 0x74, (byte) 0x69, (byte) 0x6f, (byte) 0x6e
+                },
+                encode_string("My Tagged Application")
         );
         assertArrayEquals(new byte[]{(byte) 0x01, (byte) 0x00}, left_encode(0));
         assertArrayEquals(new byte[]{(byte) 0x01, (byte) 0x7e}, left_encode(126));
@@ -133,5 +139,30 @@ class Glossary {
         } else {
             return Arrays.copyOfRange(X, a, X.length);
         }
+    }
+
+    static void displayBytes(byte[] X) {
+        final int itemsPerLine = 16;
+        for (int i = 0; i <= X.length / itemsPerLine; i++) {
+            for (int a = 0; a < itemsPerLine; a++) {
+                int abs_index = i * itemsPerLine + a;
+                if (abs_index >= X.length) {
+                    System.out.println();
+                    return;
+                }
+                System.out.printf("%02x ", X[abs_index]);
+            }
+            System.out.println();
+        }
+    }
+
+    static byte[] random(int l) {
+        if (l % 8 != 0) {
+            throw new IllegalArgumentException("The length has to be a multiple of 8!");
+        }
+        SecureRandom theRandom = new SecureRandom();
+        byte[] result = new byte[l / 8];
+        theRandom.nextBytes(result);
+        return result;
     }
 }
