@@ -1,4 +1,4 @@
-# An implementation based on SAH-3
+# An implementation based on NIST.SP.800-185
 
 Algorithms:
 • SHA-3 derived function KMACXOF256;
@@ -75,3 +75,15 @@ local disk.
 
 > The mode argument such as "-h" or "-t" has to be entered as the first argument! The other arguments can be entered
 > in different orders, but following the order listed above are highly recommended!
+
+
+
+# Credits:
+
+Our implementations is inspired by following repositories or documents:
+
+https://github.com/mjosaarinen/tiny_sha3
+
+NIST.SP.800-185
+
+https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/cSHAKE_samples.pdf
