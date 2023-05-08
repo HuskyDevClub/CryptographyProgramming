@@ -19,9 +19,7 @@ final class ECDHIES {
         final byte[] ke_ka = Keccak.KMACXOF256(Glossary.array_concatenation(z, pw), new byte[]{}, 1024, "S");
         final byte[] ke = Glossary.substring(ke_ka, 0, ke_ka.length / 2);
         final byte[] ka = Glossary.substring(ke_ka, ke_ka.length / 2, ke_ka.length);
-        assert ke.length == ka.length;
-        final byte[] c = Keccak.KMACXOF256(ke, new byte[]{}, data.length, "SKE");
-        assert c.length == data.length;
+        final byte[] c = Keccak.KMACXOF256(ke, new byte[]{}, data.length * 8, "SKE");
         // xor c with m
         for (int i = 0; i < c.length; i++) {
             c[i] = (byte) (c[i] ^ data[i]);
@@ -44,7 +42,7 @@ final class ECDHIES {
         final byte[] ke_ka = Keccak.KMACXOF256(Glossary.array_concatenation(z, pw), new byte[]{}, 1024, "S");
         final byte[] ke = Glossary.substring(ke_ka, 0, ke_ka.length / 2);
         final byte[] ka = Glossary.substring(ke_ka, ke_ka.length / 2, ke_ka.length);
-        final byte[] m = Keccak.KMACXOF256(ke, new byte[]{}, c.length, "SKE");
+        final byte[] m = Keccak.KMACXOF256(ke, new byte[]{}, c.length * 8, "SKE");
         // xor m with c
         for (int i = 0; i < m.length; i++) {
             m[i] = (byte) (m[i] ^ c[i]);
