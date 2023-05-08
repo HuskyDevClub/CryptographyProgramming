@@ -1,7 +1,13 @@
 import java.util.Arrays;
 
 /**
- * Implements the Keccak[c] algorithm from NIST FIPS 202.
+ * Implements the Keccak algorithm from NIST FIPS 202.
+ * References https://github.com/mjosaarinen/tiny_sha3 for algorithm implementations as well as
+ * https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf and
+ * https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf
+ * which are NIST FIP 202 and NIST SP 800-185 respectively.
+ *
+ * @author: Brian LeSmith
  */
 final class Keccak {
     //Round constants reference link: https://keccak.team/keccak_specs_summary.html
@@ -42,8 +48,8 @@ final class Keccak {
      */
     public static byte[] SHAKE256(final byte[] input, final int bitLength) {
         final byte[] uin = Arrays.copyOf(input, input.length + 1);
-        final int bytesToPad = 136 - input.length % (136); // rate is 136 bytes
-        uin[input.length] = bytesToPad == 1 ? (byte) 0x9f : 0x1f; // pad with suffix defined input FIPS 202 sec. 6.2
+        final int bytesToPad = 136 - input.length % (136);
+        uin[input.length] = bytesToPad == 1 ? (byte) 0x9f : 0x1f;
         return sponge(uin, bitLength, 512);
     }
 
@@ -94,12 +100,12 @@ final class Keccak {
      */
     private static byte[] sponge(final byte[] input, final int bitLength, final int capacity) {
         final int rate = 1600 - capacity;
-        final byte[] padded = input.length % (rate / 8) == 0 ? input : padTenOne(rate, input); // one bit of padding already appended
+        final byte[] padded = input.length % (rate / 8) == 0 ? input : padTenOne(rate, input);
         final long[][] states = byteArrayToStates(padded, capacity);
         long[] stcml = new long[25];
 
         for (final long[] st : states) {
-            stcml = keccakp(xorStates(stcml, st), 1600, 24); // Keccak[c] restricted to bitLength 1600
+            stcml = keccakp(xorStates(stcml, st), 1600, 24);
         }
 
         long[] out = {};
@@ -128,7 +134,7 @@ final class Keccak {
 
         for (int i = 0; i < input.length + bytesToPad; i++) {
             if (i < input.length) padded[i] = input[i];
-            else if (i == input.length + bytesToPad - 1) padded[i] = (byte) 0x80; // does not append any domain prefixs
+            else if (i == input.length + bytesToPad - 1) padded[i] = (byte) 0x80;
             else padded[i] = 0;
         }
 
