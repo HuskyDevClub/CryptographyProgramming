@@ -12,9 +12,9 @@ import java.util.Scanner;
  *
  * @author Yudong Lin
  */
-public class Main {
+final class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
         if (args.length < 1) {
             System.out.println("Invalid argument format detected, abort.");
         } else if (args[0].equals("-test")) {
@@ -23,7 +23,7 @@ public class Main {
         } else {
             /* getting the input arguments */
             final byte[] data;
-            final var argsL = Arrays.asList(args);
+            final List<String> argsL = Arrays.asList(args);
             int data_index = argsL.indexOf("-f");
             if (data_index < 0) {
                 data_index = argsL.indexOf("-s");
@@ -57,10 +57,10 @@ public class Main {
      * @param message the message used to prompt for user input
      * @return the user input in bytes
      */
-    private static byte[] input(String message) {
+    private static byte[] input(final String message) {
         System.out.print(message);
-        Scanner _SCANNER = new Scanner(System.in);
-        String strIn = _SCANNER.nextLine();
+        final Scanner _SCANNER = new Scanner(System.in);
+        final String strIn = _SCANNER.nextLine();
         return strIn.getBytes();
     }
 
@@ -70,7 +70,7 @@ public class Main {
      * @param args the input arguments
      * @return the passphrase
      */
-    private static byte[] getPassphrase(List<String> args) {
+    private static byte[] getPassphrase(final List<String> args) {
         final int _index = args.indexOf("-p");
         return _index < 0 ? input("Please enter a string as passphrase: ") : args.get(_index + 1).getBytes();
     }
@@ -81,7 +81,7 @@ public class Main {
      * @param args the input arguments
      * @return the output path
      */
-    private static Path getOutputPath(List<String> args) {
+    private static Path getOutputPath(final List<String> args) {
         final int _index = args.indexOf("-o");
         return _index < 0 ? null : Path.of(args.get(_index + 1));
     }
@@ -91,8 +91,8 @@ public class Main {
      *
      * @param data the data used to compute
      */
-    private static void computeHash(byte[] data) {
-        var h = Keccak.KMACXOF256("".getBytes(), data, 512, "D");
+    private static void computeHash(final byte[] data) {
+        final byte[] h = Keccak.KMACXOF256("".getBytes(), data, 512, "D");
         System.out.printf("Plain cryptographic hash (length %d):\n", h.length);
         Glossary.displayBytes(h);
     }
@@ -103,8 +103,8 @@ public class Main {
      * @param data the data used to compute
      * @param pw   the passphrase that will be used
      */
-    private static void computeTag(byte[] data, byte[] pw) {
-        var t = Keccak.KMACXOF256(pw, data, 512, "T");
+    private static void computeTag(final byte[] data, final byte[] pw) {
+        final byte[] t = Keccak.KMACXOF256(pw, data, 512, "T");
         System.out.printf("Authentication tag (length %d):\n", t.length);
         Glossary.displayBytes(t);
     }
@@ -115,8 +115,8 @@ public class Main {
      * @param data the data that will be encrypted
      * @param pw   the passphrase that will be used
      */
-    private static void encryptData(byte[] data, byte[] pw, Path savedTo) throws IOException {
-        var enc_data = ECDHIES.encrypt(data, pw);
+    private static void encryptData(final byte[] data, final byte[] pw, final Path savedTo) throws IOException {
+        final byte[] enc_data = ECDHIES.encrypt(data, pw);
         System.out.printf("Encrypted data (length %d):\n", enc_data.length);
         Glossary.displayBytes(enc_data);
         if (savedTo != null) {
@@ -130,8 +130,8 @@ public class Main {
      * @param enc_data the data that will be decrypted
      * @param pw       the passphrase that will be used
      */
-    private static void decryptData(byte[] enc_data, byte[] pw, Path savedTo) throws IOException {
-        var dec_data = ECDHIES.decrypt(enc_data, pw);
+    private static void decryptData(final byte[] enc_data, final byte[] pw, final Path savedTo) throws IOException {
+        final byte[] dec_data = ECDHIES.decrypt(enc_data, pw);
         System.out.printf("\nDecrypted data (length %d):\n", dec_data.length);
         Glossary.displayBytes(dec_data);
         System.out.printf("Decrypted message: %s\n", new String(dec_data));
