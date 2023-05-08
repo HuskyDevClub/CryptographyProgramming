@@ -6,7 +6,6 @@ import java.util.Arrays;
  */
 public class Keccak
 {
-    private enum ENCODE {Left, Right}
     //Round constants reference link: https://keccak.team/keccak_specs_summary.html
     private static final long[] myRoundConstants =
     {
@@ -37,23 +36,6 @@ public class Keccak
     };
 
     /**
-     * The SHA-3 hash function.
-     * @param input Parameter for the bytes to compute the digest.
-     * @param bitLength Parameter for the desired length of the output (must be 224, 256, 384, or 512).
-     * @return Returns the message digest from the Keccak[bitLength*2] permutation.
-     */
-    public static byte[] SHA3(final byte[] input, final int bitLength)
-    {
-        if (bitLength != 224 && bitLength != 256 && bitLength != 384 && bitLength != 512)
-            throw new IllegalArgumentException("Supported output bit lengths are 224, 256, 384, and 512.");
-        byte[] uin = Arrays.copyOf(input, input.length + 1);
-        int bytesToPad = (1600 - bitLength*2) / 8 - input.length % (1600 - bitLength*2);
-        uin[input.length] = bytesToPad == 1 ? (byte) 0x86 : 0x06;
-
-        return sponge(uin, bitLength, bitLength*2);
-    }
-
-    /**
      * Produces a variable length message digest based on the keccak-f permutation over the user input.
      * @param input Parameter for the bytes to compute the digest.
      * @param bitLength Parameter for the desired length of the output.
@@ -80,8 +62,8 @@ public class Keccak
     {
         if (methodName.equals("") && customizationStr.equals("")) return SHAKE256(input, bitLength);
 
-        byte[] fin = mergeByteArrays(encodeString(methodName.getBytes()), encodeString(customizationStr.getBytes()));
-        fin = mergeByteArrays(bytepad(fin, 136), input);
+        byte[] fin = mergeByteArrays(Glossary.encode_string(methodName.getBytes()), Glossary.encode_string(customizationStr.getBytes()));
+        fin = mergeByteArrays(Glossary.bytepad(fin, 136), input);
         fin = mergeByteArrays(fin, new byte[] {0x04});
 
         return sponge(fin, bitLength, 512);
@@ -98,8 +80,8 @@ public class Keccak
     public static byte[] KMACXOF256(final byte[] key, final byte[] input, final int bitLength,
                                     final String customizationStr)
     {
-        byte[] newIn = mergeByteArrays(bytepad(encodeString(key), 136), input);
-        newIn = mergeByteArrays(newIn, lrEncode(0, ENCODE.Right));
+        byte[] newIn = mergeByteArrays(Glossary.bytepad(Glossary.encode_string(key), 136), input);
+        newIn = mergeByteArrays(newIn, Glossary.right_encode(0));
 
         return cSHAKE256(newIn, bitLength,  "KMAC", customizationStr);
     }
@@ -264,64 +246,6 @@ public class Keccak
         return stateInput;
     }
 
-    /**
-     * Pads a bit string.
-     * @param str Parameter for the bit string to pad.
-     * @param desiredFactor Parameter for the desired factor of the padding.
-     * @return Returns a byte array prepended by lrEncode(desiredFactor)
-     * such that it's length is an even multiple of desiredFactor.
-     */
-    private static byte[] bytepad(final byte[] str, final int desiredFactor)
-    {
-        byte[] lEnc = lrEncode(desiredFactor, ENCODE.Left);
-        int len = lEnc.length + str.length + (desiredFactor - (lEnc.length + str.length) % desiredFactor);
-        byte[] out = Arrays.copyOf(lEnc, len);
-        System.arraycopy(str, 0, out, lEnc.length, str.length);
-
-        return out;
-    }
-
-    /**
-     * The encodeString method.
-     * @param str Parameter for the bit string to encode (as a byte array).
-     * @return Returns the bit string produced by prepending the encoding of str.length to str
-     */
-    private static byte[] encodeString(final byte[] str)
-    {
-        //Bitwise encoding
-        byte[] lEnc = lrEncode(str.length*8, ENCODE.Left);
-        byte[] out = Arrays.copyOf(lEnc, lEnc.length + str.length);
-        System.arraycopy(str, 0, out, lEnc.length, str.length);
-
-        return out;
-    }
-
-    /**
-     * The left/right encode method.
-     * @param size Parameter for the integer to encode.
-     * @param direction Parameter for the desired direction of the encoding.
-     * @return Returns a byte array.
-     */
-    private static byte[] lrEncode(final long size, final ENCODE direction)
-    {
-        if (size==0) return direction == ENCODE.Left ? new byte[] {1, 0} : new byte[] {0, 1};
-        byte[] buf = new byte[8];
-        long l = size;
-        int cnt = 0;
-
-        while (l > 0)
-        {
-            byte b = (byte) (l & 0xffL);
-            l = l>>>(8);
-            buf[7 - cnt++] = b;
-        }
-
-        byte[] out = new byte[cnt + 1];
-        System.arraycopy(buf, 8 - cnt, out, direction == ENCODE.Left ? 1 : 0, cnt);
-        out[direction == ENCODE.Left ? 0 : out.length - 1] = (byte) cnt;
-
-        return out;
-    }
 
     /**
      * Converts an extended state array to an array of bytes of bit length bitLength (equivalent to Trunc_r).

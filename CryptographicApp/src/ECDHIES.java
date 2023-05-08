@@ -1,7 +1,11 @@
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-public class ECDHIES {
+/**
+ * Implementation of ECDHIES encryption and decryption
+ *
+ * @author Yudong Lin
+ */
+class ECDHIES {
     final static int Z_LEN = 64;
     final static int T_LEN = 64;
 
@@ -10,18 +14,19 @@ public class ECDHIES {
      * @param pw   the passphrase used for encryption
      * @return the data that is encrypted
      */
-    static byte[] encrypt(final byte[] data, final byte[] pw) throws NoSuchAlgorithmException {
+    static byte[] encrypt(final byte[] data, final byte[] pw) {
         byte[] z = Glossary.random(Z_LEN * 8);
-        var ke_ka = KMACX.KMACXOF256(Glossary.array_concatenation(z, pw), new byte[]{}, 1024, "S");
+        var ke_ka = Keccak.KMACXOF256(Glossary.array_concatenation(z, pw), new byte[]{}, 1024, "S");
         byte[] ke = Glossary.substring(ke_ka, 0, ke_ka.length / 2);
         byte[] ka = Glossary.substring(ke_ka, ke_ka.length / 2, ke_ka.length);
         assert ke.length == ka.length;
-        byte[] c = KMACX.KMACXOF256(ke, new byte[]{}, data.length, "SKE");
+        byte[] c = Keccak.KMACXOF256(ke, new byte[]{}, data.length, "SKE");
+        assert c.length == data.length;
         // xor c with m
         for (int i = 0; i < c.length; i++) {
             c[i] = (byte) (c[i] ^ data[i]);
         }
-        var t = KMACX.KMACXOF256(ka, data, T_LEN * 8, "SKA");
+        var t = Keccak.KMACXOF256(ka, data, T_LEN * 8, "SKA");
         return Glossary.array_concatenation(z, c, t);
     }
 
@@ -30,21 +35,21 @@ public class ECDHIES {
      * @param pw   the passphrase used for decryption
      * @return the data that is decrypted
      */
-    static byte[] decrypt(final byte[] data, final byte[] pw) throws NoSuchAlgorithmException {
+    static byte[] decrypt(final byte[] data, final byte[] pw) {
         // obtain z, c and t from data
         byte[] z = Arrays.copyOfRange(data, 0, Z_LEN);
         byte[] c = Arrays.copyOfRange(data, z.length, data.length - T_LEN);
         byte[] t = Arrays.copyOfRange(data, z.length + c.length, data.length);
 
-        byte[] ke_ka = KMACX.KMACXOF256(Glossary.array_concatenation(z, pw), new byte[]{}, 1024, "S");
+        byte[] ke_ka = Keccak.KMACXOF256(Glossary.array_concatenation(z, pw), new byte[]{}, 1024, "S");
         byte[] ke = Glossary.substring(ke_ka, 0, ke_ka.length / 2);
         byte[] ka = Glossary.substring(ke_ka, ke_ka.length / 2, ke_ka.length);
-        var m = KMACX.KMACXOF256(ke, new byte[]{}, c.length, "SKE");
+        var m = Keccak.KMACXOF256(ke, new byte[]{}, c.length, "SKE");
         // xor m with c
         for (int i = 0; i < m.length; i++) {
             m[i] = (byte) (m[i] ^ c[i]);
         }
-        var t_inv = KMACX.KMACXOF256(ka, m, 512, "SKA");
+        var t_inv = Keccak.KMACXOF256(ka, m, 512, "SKA");
         if (!Arrays.equals(t_inv, t)) {
             throw new IllegalArgumentException("Invalid z potentially due to incorrect passphrase!");
         }

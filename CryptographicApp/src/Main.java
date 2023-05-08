@@ -2,20 +2,24 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * The main function, takes input and arguments according to the instruction listed in the report.
+ * Then do whatever it supposes to do (hopefully)
+ *
+ * @author Yudong Lin
+ */
 public class Main {
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+    public static void main(String[] args) throws IOException {
         if (args.length < 1) {
             System.out.println("Invalid argument format detected, abort.");
         } else if (args[0].equals("-test")) {
             // debugging use only
             Glossary.test();
-            cShake.test();
         } else {
             /* getting the input arguments */
             final byte[] data;
@@ -87,8 +91,8 @@ public class Main {
      *
      * @param data the data used to compute
      */
-    private static void computeHash(byte[] data) throws NoSuchAlgorithmException {
-        var h = KMACX.KMACXOF256("".getBytes(), data, 512, "D");
+    private static void computeHash(byte[] data) {
+        var h = Keccak.KMACXOF256("".getBytes(), data, 512, "D");
         System.out.printf("Plain cryptographic hash (length %d):\n", h.length);
         Glossary.displayBytes(h);
     }
@@ -99,8 +103,8 @@ public class Main {
      * @param data the data used to compute
      * @param pw   the passphrase that will be used
      */
-    private static void computeTag(byte[] data, byte[] pw) throws NoSuchAlgorithmException {
-        var t = KMACX.KMACXOF256(pw, data, 512, "T");
+    private static void computeTag(byte[] data, byte[] pw) {
+        var t = Keccak.KMACXOF256(pw, data, 512, "T");
         System.out.printf("Authentication tag (length %d):\n", t.length);
         Glossary.displayBytes(t);
     }
@@ -111,7 +115,7 @@ public class Main {
      * @param data the data that will be encrypted
      * @param pw   the passphrase that will be used
      */
-    private static void encryptData(byte[] data, byte[] pw, Path savedTo) throws NoSuchAlgorithmException, IOException {
+    private static void encryptData(byte[] data, byte[] pw, Path savedTo) throws IOException {
         var enc_data = ECDHIES.encrypt(data, pw);
         System.out.printf("Encrypted data (length %d):\n", enc_data.length);
         Glossary.displayBytes(enc_data);
@@ -126,7 +130,7 @@ public class Main {
      * @param enc_data the data that will be decrypted
      * @param pw       the passphrase that will be used
      */
-    private static void decryptData(byte[] enc_data, byte[] pw, Path savedTo) throws NoSuchAlgorithmException, IOException {
+    private static void decryptData(byte[] enc_data, byte[] pw, Path savedTo) throws IOException {
         var dec_data = ECDHIES.decrypt(enc_data, pw);
         System.out.printf("\nDecrypted data (length %d):\n", dec_data.length);
         Glossary.displayBytes(dec_data);

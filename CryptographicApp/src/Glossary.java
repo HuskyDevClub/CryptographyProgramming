@@ -5,6 +5,11 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
+/**
+ * A set of functions implemented according to NIST.SP.800-185 as close as possible
+ *
+ * @author Yudong Lin
+ */
 class Glossary {
 
     @Test
@@ -86,10 +91,20 @@ class Glossary {
         return result;
     }
 
+    /**
+     * The encodeString method.
+     * @param S Parameter for the bit string to encode (as a byte array).
+     * @return Returns the bit string produced by prepending the encoding of S.length to str
+     */
     static byte[] encode_string(String S) {
         return encode_string(S.getBytes());
     }
 
+    /**
+     * The encodeString method.
+     * @param S Parameter for the bit string to encode (as a byte array).
+     * @return Returns the bit string produced by prepending the encoding of S.length to str
+     */
     static byte[] encode_string(byte[] S) {
         assert S.length <= Math.pow(2, 2040);
         return array_concatenation(left_encode(S.length * 8L), S);

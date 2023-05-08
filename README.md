@@ -7,6 +7,12 @@ Algorithms:
 Objective: implement (in Java) a library and an app for asymmetric encryption and digital signatures at the 256-bit
 security level
 
+# Developed By:
+
+**Yudong Lin** - The overall structure of the program, including but not limited to Glossary functions and ECDHIES encryption, and so on.
+
+**Brian M LeSmith** - The implementation of cSHAKE256
+
 # What this program will do:
 
 1. Compute a plain cryptographic hash of a given file.
@@ -65,8 +71,7 @@ local disk.
 
 `-d -f <file path>` -- same as above, but you will be prompted to input a passphrase manually
 
-
+#### Please Note that:
 
 > The mode argument such as "-h" or "-t" has to be entered as the first argument! The other arguments can be entered
 > in different orders, but following the order listed above are highly recommended!
-
