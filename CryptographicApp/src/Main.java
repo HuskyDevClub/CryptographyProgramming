@@ -229,9 +229,9 @@ final class Main {
      */
     private static void getEllipticKeyPair(final byte[] pw, final Path publicKeySavedTo, final Path privateKeySavedTo) {
         // generate an elliptic key pair from a given passphrase
-        final byte[][] key = EllipticCurves.getSchnorrKeyPair(pw);
-        final byte[] publicKey = key[0];
-        final byte[] privateKey = key[1];
+        final EllipticCurveKeyPair theKeyPair = EllipticCurves.getSchnorrKeyPair(pw);
+        final byte[] publicKey = theKeyPair.getPublicKey();
+        final byte[] privateKey = theKeyPair.getPrivateKey();
         // print public key to console
         System.out.printf("\nPublic key (length %d):\n", publicKey.length);
         Glossary.displayBytes(publicKey);

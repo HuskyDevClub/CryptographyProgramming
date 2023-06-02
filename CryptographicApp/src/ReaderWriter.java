@@ -1,24 +1,19 @@
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
-import java.io.*;
-
-public class ReaderWriter
-{
-    public static byte[] readFileBytes(String theFileName)
-    {
+public class ReaderWriter {
+    public static byte[] readFileBytes(final String theFileName) {
         byte[] outBytes = null;
 
-        try
-        {
-            FileInputStream keyIn = new FileInputStream(theFileName);
+        try {
+            final FileInputStream keyIn = new FileInputStream(theFileName);
             outBytes = keyIn.readAllBytes();
-        }
-        catch (FileNotFoundException fne)
-        {
+        } catch (final FileNotFoundException fne) {
             System.out.println("Unable to locate the file: " + theFileName);
             System.exit(1);
-        }
-        catch (IOException e)
-        {
+        } catch (final IOException e) {
             System.out.println("Error occurred while reading this file: " + theFileName);
             e.printStackTrace();
             System.exit(1);
@@ -27,20 +22,14 @@ public class ReaderWriter
         return outBytes;
     }
 
-    public static void writeBytesToFile(byte[] theOutput, String theFileName)
-    {
-        try
-        {
-            FileOutputStream out = new FileOutputStream(theFileName);
+    public static void writeBytesToFile(final byte[] theOutput, final String theFileName) {
+        try {
+            final FileOutputStream out = new FileOutputStream(theFileName);
             out.write(theOutput);
-        }
-        catch (FileNotFoundException e)
-        {
+        } catch (final FileNotFoundException e) {
             System.out.println("Cannot access file.");
             System.exit(1);
-        }
-        catch (IOException e)
-        {
+        } catch (final IOException e) {
             System.out.println("Could not write to output file.");
             e.printStackTrace();
             System.exit(1);
