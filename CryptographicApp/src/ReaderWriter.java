@@ -14,12 +14,12 @@ public class ReaderWriter
         }
         catch (FileNotFoundException fne)
         {
-            System.out.println("Unable to locate file: " + theFileName + ", is the URL correct?");
+            System.out.println("Unable to locate the file: " + theFileName);
             System.exit(1);
         }
         catch (IOException e)
         {
-            System.out.println("Error occurred while reading file: ." + theFileName);
+            System.out.println("Error occurred while reading this file: " + theFileName);
             e.printStackTrace();
             System.exit(1);
         }
