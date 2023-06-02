@@ -31,7 +31,9 @@ security level
 
 # How to use:
 
-#### Compute a plain cryptographic hash:
+### SHA-3:
+
+##### Compute a plain cryptographic hash:
 
 `-h -f <file path>` -- the program will compute a plain cryptographic hash of the file located on given path
 
@@ -39,7 +41,7 @@ security level
 
 `-h` -- you will be asked to input a string, then the program will compute a plain cryptographic hash of a given string
 
-#### Compute an authentication tag:
+##### Compute an authentication tag:
 
 `-t -f <file path> -p <passphrase>` -- the program will compute an authentication tag of the file located on given path
 with the given passphrase
@@ -54,7 +56,7 @@ passphrase
 `-t` -- you will be asked to input a string and a passphrase, then the program will compute an authentication tag of a
 given string with the given passphrase
 
-#### Encryption:
+##### Encryption:
 
 `-e -f <input file path> -p <passphrase> -o <output file path>` -- the program will encrypt the file located on given
 path with the given passphrase, and then save to given location
@@ -65,11 +67,60 @@ manually
 `-e -f <input file path>` -- same as above, but the encrypted data will only be printed to console, and not save to
 local disk.
 
-#### Decryption:
+##### Decryption:
 
 `-d -f <file path> -p <passphrase>` -- the program will decrypt the file located on given path with the given passphrase
 
 `-d -f <file path>` -- same as above, but you will be prompted to input a passphrase manually
+
+
+
+### Elliptic curves:
+
+##### Generate an elliptic key pair:
+
+`-eck -p <passphrase> -o <public key output path> -o2 <private key output path> ` -- generate an elliptic key pair from a given passphrase and write the public key and encrypted private key to given location.
+
+`-eck -o <public key output path> -o2 <private key output path> ` -- same as above, but you will be prompted to input a passphrase
+manually
+
+`-eck -o <public key output path> ` -- same as above, but the private key will only be printed to console, and will not be saved to local disk.
+
+`-eck` -- same as above, but the  public key will only be printed to console, and will not be saved to local disk.
+
+##### Encryption using elliptic public key:
+
+`-ece -f <input file path> -keyp <key file path> -o <ciphertext svae to path>` -- generate an elliptic key pair from a given passphrase and write the public key and encrypted private key to given location.
+
+`-ece -keyp <key file path> -o <ciphertext svae to path>` -- same as above, but you will be asked to input a string which will be encrypted and save to given location.
+
+`-ece -keyp <key file path>` -- same as above, but the encrypted data will only be printed to console, and will not be saved to local disk.
+
+##### Decryption:
+
+`-ecd -f <input file path> -p <passphrase> -o <output file path>` -- the program will encrypt the file located on given
+path with the given passphrase, and then save to given location
+
+`-ecd -f <input file path> -o <output file path>` -- same as above, but you will be prompted to input a passphrase manually
+
+`-ecd -f <input file path>` -- same as above, but the encrypted data will only be printed to console, and not save to local disk.
+
+##### Sign:
+
+`-ecs -f <input file path> -p <passphrase> -o <output file path>` -- the program will sign the file located on given
+path with the given passphrase, and write the signature to give output path.
+
+`-ecs -p <passphrase> -o <output file path>` -- same as above, but you will be prompted to input a string which will be signed and used to generate the signature
+
+`-ecs -o <output file path>` -- same as above, but you will be prompted to input a passphrase manually
+
+`-ecs` -- same as above, but the signature will only be printed to console, and will not be saved to local disk.
+
+##### Verify:
+
+`-ecv -f <input data file path> -o <signature file path> -keyp <public key file path>` -- Verify a given data file and its signature file under a given public key file.
+
+
 
 #### Please Note that:
 
