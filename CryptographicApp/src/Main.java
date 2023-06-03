@@ -1,4 +1,6 @@
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +17,7 @@ import java.util.Scanner;
  */
 final class Main {
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException, ClassNotFoundException {
         if (args.length < 1) {
             System.out.println("Invalid argument format detected, abort.");
         } else if (args[0].equals("-test")) {
@@ -280,12 +282,17 @@ final class Main {
      * @param pw      the password that will be used for
      * @param savedTo write the signature to path
      */
-    private static void generateSignature(final byte[] data, final byte[] pw, final Path savedTo) {
-        final byte[][] theSignatureKeyPair = EllipticCurves.getSignature(data, pw);
-        final byte[] theSignature = Glossary.array_concatenation(theSignatureKeyPair[0], theSignatureKeyPair[1]);
-        System.out.printf("Decrypted data using given password (length %d):\n", theSignature.length);
-        Glossary.displayBytes(theSignature);
-        saveByteArray(savedTo, theSignature);
+    private static void generateSignature(final byte[] data, final byte[] pw, final Path savedTo) throws IOException {
+        final EllipticCurveKeyPair theSignatureKeyPair = EllipticCurves.getSignature(data, pw);
+        final ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+        final ObjectOutputStream objectOut = new ObjectOutputStream(streamOut);
+        objectOut.writeObject(theSignatureKeyPair);
+        objectOut.flush();
+        System.out.printf("Signature public key (length %d):\n", theSignatureKeyPair.getPublicKey().length);
+        Glossary.displayBytes(theSignatureKeyPair.getPublicKey());
+        System.out.printf("Signature private key (length %d):\n", theSignatureKeyPair.getPrivateKey().length);
+        Glossary.displayBytes(theSignatureKeyPair.getPrivateKey());
+        saveByteArray(savedTo, streamOut.toByteArray());
     }
 
 
@@ -296,7 +303,7 @@ final class Main {
      * @param theSignature the signature that needs to be checked
      * @param publicKey    the public key
      */
-    private static void verifySignature(final byte[] data, final byte[] theSignature, final byte[] publicKey) {
+    private static void verifySignature(final byte[] data, final byte[] theSignature, final byte[] publicKey) throws IOException, ClassNotFoundException {
         if (EllipticCurves.verifySignature(theSignature, data, publicKey)) {
             System.out.println("Valid Signature.");
         } else {
