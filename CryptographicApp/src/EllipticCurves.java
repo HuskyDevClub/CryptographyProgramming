@@ -1,59 +1,15 @@
-import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.HexFormat;
 
 public class EllipticCurves {
 
     final static int Z_LEN = 64;
     final static int T_LEN = 64;
 
-    public static void main(final String[] args) {
-        System.out.println(Arrays.toString(multiplicationByScalar(new byte[]{(byte) 0x01, (byte) 0x02}, new byte[1])));
+    static EllipticCurveKeyPair getSchnorrKeyPair(final byte[] pw) {
+        return new EllipticCurveKeyPair(pw);
     }
 
-    /**
-     * Compute a square root of v mod p with a specified
-     * least significant bit, if such a root exists.
-     *
-     * @param v the radicand.
-     * @param p the modulus (must satisfy p mod 4 = 3).
-     * @param lsb desired least significant bit (true: 1, false: 0).
-     * @return a square root r of v mod p with r mod 2 = 1 iff lsb = true
-     * if such a root exists, otherwise null.
-     */
-    public static BigInteger sqrt(BigInteger v, BigInteger p, boolean lsb) {
-        assert (p.testBit(0) && p.testBit(1)); // p = 3 (mod 4)
-        if (v.signum() == 0) {
-            return BigInteger.ZERO;
-        }
-        BigInteger r = v.modPow(p.shiftRight(2).add(BigInteger.ONE), p);
-        if (r.testBit(0) != lsb) {
-            r = p.subtract(r); // correct the lsb
-        }
-        return (r.multiply(r).subtract(v).mod(p).signum() == 0) ? r : null;
-    }
-
-
-    static byte[] multiplicationByScalar(final byte[] s, final byte[] G) {
-        var P = G;
-        final var s_l = HexFormat.of().formatHex(s).toCharArray();
-        for (int i = s.length - 1; i > -1; i--) {
-            P = Glossary.array_concatenation(P, P);
-            if (s_l[i] == '1') {
-                P = Glossary.array_concatenation(P, G);
-            }
-        }
-        return P;
-    }
-
-    static byte[][] getSchnorrKeyPair(final byte[] pw, final byte[] G) {
-        var s = Keccak.KMACXOF256(pw, new byte[]{}, 512, "SK");
-        s = Glossary.array_concatenation(s, s, s, s);
-        final var V = EllipticCurves.multiplicationByScalar(s, G);
-        return new byte[][]{s, V};
-    }
-
-    static byte[] encrypt(final byte[] m, final byte[] V, final byte[] G) {
+    static byte[] encrypt(final byte[] m, final byte[] V) {
         var k = Glossary.random(512);
         k = Glossary.array_concatenation(k, k, k, k);
         final var W = EllipticCurves.multiplicationByScalar(k, V);
@@ -94,7 +50,7 @@ public class EllipticCurves {
         return m;
     }
 
-    static byte[][] getSignature(final byte[] m, final byte[] pw, final byte[] G) {
+    static byte[][] getSignature(final byte[] m, final byte[] pw) {
         var s = Keccak.KMACXOF256(pw, new byte[]{}, 512, "SK");
         s = Glossary.array_concatenation(s, s, s, s);
         var k = Keccak.KMACXOF256(s, m, 512, "N");
@@ -108,7 +64,7 @@ public class EllipticCurves {
         return new byte[][]{h, z};
     }
 
-    static boolean verifySignature(final byte[][] signature, final byte[] m, final byte[] V, final byte[] G) {
+    static boolean verifySignature(final byte[] signature, final byte[] m, final byte[] V) {
         final var h = signature[0];
         final var z = signature[1];
         final var U = Glossary.array_concatenation(multiplicationByScalar(z, G), multiplicationByScalar(h, V));
