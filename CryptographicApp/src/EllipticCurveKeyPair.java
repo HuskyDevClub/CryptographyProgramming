@@ -81,7 +81,7 @@ public class EllipticCurveKeyPair {
      * @param theURL Parameter for the URL of the file.
      * @return Returns an EllipticCurvePoint.
      */
-    public static EllipticCurvePoint readPubKeyFile(final String theURL) {
+    public static EllipticCurvePoint readPublicKey(final String theURL) {
         return EllipticCurvePoint.fromByteArray(ReaderWriter.readFileBytes(theURL));
     }
 
@@ -91,7 +91,7 @@ public class EllipticCurveKeyPair {
      *
      * @param theURL Parameter for the file name.
      */
-    public void writePubToFile(final String theURL) {
+    public void writePublicKeyToFile(final String theURL) {
         ReaderWriter.writeBytesToFile(myPublicKey.toByteArray(), theURL);
     }
 
