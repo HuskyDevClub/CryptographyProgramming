@@ -3,7 +3,7 @@ import java.io.*;
 /**
  * This class is for storing Elliptic Curve key pair.
  */
-final class EllipticCurveKeyPair {
+final class EllipticCurveKeyPair implements Serializable {
     private final byte[] myPublicKey;
     private final byte[] myPrivateBytes;
 
@@ -13,7 +13,7 @@ final class EllipticCurveKeyPair {
      * @param publicKeys  public key
      * @param privateKeys private key
      */
-    EllipticCurveKeyPair(final byte[] publicKeys, final byte[] privateKeys) {
+    EllipticCurveKeyPair(final byte[] privateKeys, final byte[] publicKeys) {
         this.myPublicKey = publicKeys;
         this.myPrivateBytes = privateKeys;
     }

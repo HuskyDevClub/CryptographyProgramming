@@ -6,8 +6,6 @@ import java.util.Arrays;
  */
 public class EllipticCurvePoint {
     public static final EllipticCurvePoint ZERO = new EllipticCurvePoint();
-    public static final BigInteger R = BigInteger.valueOf(2L).pow(446)
-            .subtract(new BigInteger("13818066809895115352007386748515426880336692474882178609894547503885"));
     public static final BigInteger MARSENNE_PRIME = BigInteger.valueOf(2L).pow(448).subtract(BigInteger.valueOf(2L).pow(224)).subtract(BigInteger.ONE);
     public static final int STANDARD_BYTE_LENGTH = MARSENNE_PRIME.toByteArray().length * 2;
     private static final BigInteger DEFINE_E_521 = BigInteger.valueOf(-39081);
@@ -124,14 +122,14 @@ public class EllipticCurvePoint {
      * @return Returns this + theAddedPoint (based upon the formula described above)
      */
     public EllipticCurvePoint add(final EllipticCurvePoint theAddedPoint) {
-        final BigInteger xy = myX.multiply(theAddedPoint.myX).multiply(myY.multiply(theAddedPoint.myY)).mod(MARSENNE_PRIME);
+        final BigInteger xy = myX.multiply(theAddedPoint.myX).multiply(myY.multiply(theAddedPoint.myY));
 
-        BigInteger a = myX.multiply(theAddedPoint.myY).add(myY.multiply(theAddedPoint.myX)).mod(MARSENNE_PRIME);
-        BigInteger b = BigInteger.ONE.add(DEFINE_E_521.multiply(xy)).mod(MARSENNE_PRIME);
+        BigInteger a = myX.multiply(theAddedPoint.myY).add(myY.multiply(theAddedPoint.myX));
+        BigInteger b = BigInteger.ONE.add(DEFINE_E_521.multiply(xy));
         final BigInteger c = a.multiply(b.modInverse(MARSENNE_PRIME)).mod(MARSENNE_PRIME);
 
-        a = myY.multiply(theAddedPoint.myY).subtract(myX.multiply(theAddedPoint.myX)).mod(MARSENNE_PRIME);
-        b = BigInteger.ONE.subtract(DEFINE_E_521.multiply(xy)).mod(MARSENNE_PRIME);
+        a = myY.multiply(theAddedPoint.myY).subtract(myX.multiply(theAddedPoint.myX));
+        b = BigInteger.ONE.subtract(DEFINE_E_521.multiply(xy));
         final BigInteger d = a.multiply(b.modInverse(MARSENNE_PRIME)).mod(MARSENNE_PRIME);
 
         return new EllipticCurvePoint(c, d);

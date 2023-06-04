@@ -183,8 +183,10 @@ final class Main {
         if (savedTo != null) {
             try {
                 Files.write(savedTo, theData);
+                System.out.println("\nData has been saved to:");
+                System.out.println(savedTo);
             } catch (final IOException e) {
-                System.out.println("Warning, cannot save the data!");
+                System.out.println("\nWarning, cannot save the data!");
                 System.out.println(e.getMessage());
             }
         }
@@ -240,6 +242,7 @@ final class Main {
         // print private key to console
         System.out.printf("\nPrivate key (length %d):\n", privateKey.length);
         Glossary.displayBytes(privateKey);
+        System.out.println();
         // Encrypt the private key from that pair under the given password and write it to a different file
         encryptData(privateKey, pw, privateKeySavedTo);
     }
