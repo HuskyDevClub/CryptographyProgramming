@@ -5,14 +5,22 @@ import java.util.Arrays;
  * This class defines a point on the Elliptic Curve.
  */
 public class EllipticCurvePoint {
-    public static final EllipticCurvePoint ZERO = new EllipticCurvePoint(BigInteger.ZERO, BigInteger.ONE);
-    public static final BigInteger R = BigInteger.valueOf(2L).pow(519)
-            .subtract(new BigInteger("337554763258501705789107630418782636071904961214051226618635150085779108655765"));
-    public static final BigInteger MARSENNE_PRIME = BigInteger.valueOf(2L).pow(521).subtract(BigInteger.ONE);
+    public static final EllipticCurvePoint ZERO = new EllipticCurvePoint();
+    public static final BigInteger R = BigInteger.valueOf(2L).pow(446)
+            .subtract(new BigInteger("13818066809895115352007386748515426880336692474882178609894547503885"));
+    public static final BigInteger MARSENNE_PRIME = BigInteger.valueOf(2L).pow(448).subtract(BigInteger.valueOf(2L).pow(224)).subtract(BigInteger.ONE);
     private static final int STANDARD_BYTE_LENGTH = MARSENNE_PRIME.toByteArray().length * 2;
-    private static final BigInteger DEFINE_E_521 = BigInteger.valueOf(-376014);
+    private static final BigInteger DEFINE_E_521 = BigInteger.valueOf(-39081);
     private final BigInteger myX;
     private final BigInteger myY;
+
+    /**
+     * Initializes a point for the neutral element.
+     */
+    public EllipticCurvePoint() {
+        this.myX = BigInteger.ZERO;
+        this.myY = BigInteger.ONE;
+    }
 
     /**
      * Initializes a point on the curve using parameter given x and y coordinate.
@@ -40,14 +48,14 @@ public class EllipticCurvePoint {
     public EllipticCurvePoint(final BigInteger theX, final boolean theLeastSignificantBit) {
         final BigInteger a = BigInteger.ONE.subtract(theX.pow(2)); // 1 - theX^2
         final BigInteger b = BigInteger.ONE.subtract(DEFINE_E_521.multiply(theX.pow(2))); // 1 - d * theX^2
-        final BigInteger sqrt = sqrt(a.multiply(b.modInverse(MARSENNE_PRIME)), theLeastSignificantBit); // sqrt( (1 - theX^2) / (1 - dx^2)) mod p
+        final BigInteger y = sqrt(a.multiply(b.modInverse(MARSENNE_PRIME)), theLeastSignificantBit); // sqrt( (1 - theX^2) / (1 - dx^2)) mod p
 
-        if (sqrt == null) {
+        if (y == null) {
             throw new IllegalArgumentException("No square root of the provided theX exists");
         }
 
         this.myX = theX;
-        this.myY = sqrt.mod(MARSENNE_PRIME);
+        this.myY = y.mod(MARSENNE_PRIME);
     }
 
     /**
@@ -95,9 +103,8 @@ public class EllipticCurvePoint {
      * @param s Parameter for the scalar to multiply by.
      * @return Returns the given point multiplied by the parameter scalar.
      */
-    public EllipticCurvePoint scalarMultiply(BigInteger s) {
+    public EllipticCurvePoint scalarMultiply(final BigInteger s) {
         EllipticCurvePoint V = ZERO;
-        s = s.mod(R);
         final int k = s.bitLength();
         for (int i = k - 1; i >= 0; i--) { // scan over the k bits of s
             V = V.add(V); // invoke the Edwards point addition formula
@@ -182,17 +189,11 @@ public class EllipticCurvePoint {
      */
     @Override
     public boolean equals(final Object theOther) {
-        if (this == theOther) {
-            return true;
-        }
-
         if (theOther == null || getClass() != theOther.getClass()) {
             return false;
         }
-
-        final EllipticCurvePoint temp = (EllipticCurvePoint) theOther;
-
-        return myX.equals(temp.myX) && myY.equals(temp.myY);
+        final EllipticCurvePoint o = (EllipticCurvePoint) theOther;
+        return myX.equals(o.myX) && myY.equals(o.myY);
     }
 
     /**
