@@ -6,12 +6,11 @@ import java.util.Arrays;
  */
 public class EllipticCurvePoint {
     public static final EllipticCurvePoint ZERO = new EllipticCurvePoint(BigInteger.ZERO, BigInteger.ONE);
-    private static final String R_COMPUTE = "337554763258501705789107630418782636071904961214051226618635150085779108655765";
-    public static final BigInteger SCHNORR_COMPUTE_R = BigInteger.valueOf(2L).pow(519).subtract(new BigInteger(R_COMPUTE));
-    private static final BigInteger MARSENNE_PRIME = BigInteger.valueOf(2L).pow(521).subtract(BigInteger.ONE);
-    public static final int STANDARD_BYTE_LENGTH = MARSENNE_PRIME.toByteArray().length * 2;
+    public static final BigInteger R = BigInteger.valueOf(2L).pow(519)
+            .subtract(new BigInteger("337554763258501705789107630418782636071904961214051226618635150085779108655765"));
+    public static final BigInteger MARSENNE_PRIME = BigInteger.valueOf(2L).pow(521).subtract(BigInteger.ONE);
+    private static final int STANDARD_BYTE_LENGTH = MARSENNE_PRIME.toByteArray().length * 2;
     private static final BigInteger DEFINE_E_521 = BigInteger.valueOf(-376014);
-
     private final BigInteger myX;
     private final BigInteger myY;
 
@@ -69,21 +68,44 @@ public class EllipticCurvePoint {
     }
 
     /**
+     * Compute a square root of v mod p with a specified
+     * least significant bit, if such a root exists.
+     *
+     * @param v   the radicand.
+     * @param p   the modulus (must satisfy p mod 4 = 3).
+     * @param lsb desired least significant bit (true: 1, false: 0).
+     * @return a square root r of v mod p with r mod 2 = 1 iff lsb = true
+     * if such a root exists, otherwise null.
+     */
+    public static BigInteger sqrt(final BigInteger v, final BigInteger p, final boolean lsb) {
+        assert (p.testBit(0) && p.testBit(1)); // p = 3 (mod 4)
+        if (v.signum() == 0) {
+            return BigInteger.ZERO;
+        }
+        BigInteger r = v.modPow(p.shiftRight(2).add(BigInteger.ONE), p);
+        if (r.testBit(0) != lsb) {
+            r = p.subtract(r); // correct the lsb
+        }
+        return (r.multiply(r).subtract(v).mod(p).signum() == 0) ? r : null;
+    }
+
+    /**
      * Multiplies a given point by a scalar and returns that result.
      *
-     * @param theScalar Parameter for the scalar to multiply by.
+     * @param s Parameter for the scalar to multiply by.
      * @return Returns the given point multiplied by the parameter scalar.
      */
-    public EllipticCurvePoint scalarMultiply(final BigInteger theScalar) {
-        EllipticCurvePoint output = ZERO;
-        int counter = theScalar.bitLength();
-
-        while (counter >= 0) {
-            output = output.add(output);
-            if (theScalar.testBit(counter--)) output = output.add(this);
+    public EllipticCurvePoint scalarMultiply(BigInteger s) {
+        EllipticCurvePoint V = ZERO;
+        s = s.mod(R);
+        final int k = s.bitLength();
+        for (int i = k - 1; i >= 0; i--) { // scan over the k bits of s
+            V = V.add(V); // invoke the Edwards point addition formula
+            if (s.testBit(i)) { // test the i-th bit of s
+                V = V.add(this); // invoke the Edwards point addition formula
+            }
         }
-
-        return output;
+        return V; // now finally V = s*P
     }
 
     /**
@@ -174,27 +196,16 @@ public class EllipticCurvePoint {
     }
 
     /**
-     * Computes the square root of the radicand mod p using a least significant
-     * bit, if such a root exists. Provided in the lecture notes of Paulo Barreto.
+     * Compute a square root of v mod p with a specified
+     * least significant bit, if such a root exists.
      *
-     * @param theRadicand            Parameter for the radicand.
-     * @param theLeastSignificantBit Parameter for the least significant bit.
-     * @return Returns square root of the radicand mod p.
+     * @param v   the radicand.
+     * @param lsb desired least significant bit (true: 1, false: 0).
+     * @return a square root r of v mod p with r mod 2 = 1 iff lsb = true
+     * if such a root exists, otherwise null.
      */
-    private BigInteger sqrt(final BigInteger theRadicand, final boolean theLeastSignificantBit) {
-        assert (MARSENNE_PRIME.testBit(0) && MARSENNE_PRIME.testBit(1));
-
-        if (theRadicand.signum() == 0) {
-            return BigInteger.ZERO;
-        }
-
-        BigInteger squareRoot = theRadicand.modPow(MARSENNE_PRIME.shiftRight(2).add(BigInteger.ONE), MARSENNE_PRIME);
-
-        if (squareRoot.testBit(0) != theLeastSignificantBit) {
-            squareRoot = MARSENNE_PRIME.subtract(squareRoot);
-        }
-
-        return (squareRoot.multiply(squareRoot).subtract(theRadicand).mod(MARSENNE_PRIME).signum() == 0) ? squareRoot : null;
+    private BigInteger sqrt(final BigInteger v, final boolean lsb) {
+        return sqrt(v, MARSENNE_PRIME, lsb);
     }
 
     /**

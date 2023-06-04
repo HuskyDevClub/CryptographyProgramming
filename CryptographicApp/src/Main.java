@@ -1,6 +1,4 @@
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -284,15 +282,11 @@ final class Main {
      */
     private static void generateSignature(final byte[] data, final byte[] pw, final Path savedTo) throws IOException {
         final EllipticCurveKeyPair theSignatureKeyPair = EllipticCurves.getSignature(data, pw);
-        final ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-        final ObjectOutputStream objectOut = new ObjectOutputStream(streamOut);
-        objectOut.writeObject(theSignatureKeyPair);
-        objectOut.flush();
         System.out.printf("Signature public key (length %d):\n", theSignatureKeyPair.getPublicKey().length);
         Glossary.displayBytes(theSignatureKeyPair.getPublicKey());
         System.out.printf("Signature private key (length %d):\n", theSignatureKeyPair.getPrivateKey().length);
         Glossary.displayBytes(theSignatureKeyPair.getPrivateKey());
-        saveByteArray(savedTo, streamOut.toByteArray());
+        saveByteArray(savedTo, EllipticCurveKeyPair.toByteArray(theSignatureKeyPair));
     }
 
 

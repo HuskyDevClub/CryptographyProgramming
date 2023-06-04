@@ -1,80 +1,67 @@
-import java.math.BigInteger;
-import java.util.Arrays;
+import java.io.*;
 
 /**
- * This class is for encapsulating an ECDHIES key pair.
- * The public key is two EllipticCurvePoints,
- * the private key is a BigInteger which is created using
- * a user given password.
+ * This class is for storing Elliptic Curve key pair.
  */
-public class EllipticCurveKeyPair {
-    /**
-     * The static point of the public key.
-     */
-    public static final EllipticCurvePoint PUBLIC_KEY_POINT = new EllipticCurvePoint(BigInteger.valueOf(4L), false);
-    private final EllipticCurvePoint myPublicKey;
+final class EllipticCurveKeyPair {
+    private final byte[] myPublicKey;
     private final byte[] myPrivateBytes;
 
     /**
-     * Generates a new key pair using the byte array parameter.
+     * Create a new key pair
      *
-     * @param thePassword Parameter for the password.
+     * @param publicKeys  public key
+     * @param privateKeys private key
      */
-    public EllipticCurveKeyPair(final byte[] thePassword) {
-        BigInteger s = new BigInteger(Keccak.KMACXOF256(thePassword, new byte[]{}, 512, "SK"));
-        s = s.multiply(BigInteger.valueOf(4L));
-        this.myPublicKey = PUBLIC_KEY_POINT.scalarMultiply(s);
-        this.myPrivateBytes = s.toByteArray();
+    EllipticCurveKeyPair(final byte[] publicKeys, final byte[] privateKeys) {
+        this.myPublicKey = publicKeys;
+        this.myPrivateBytes = privateKeys;
     }
 
     /**
-     * Generates a new key pair using the byte array parameter.
+     * Serialize a EllipticCurveKeyPair into a byte array
      *
-     * @param publicKeys  public key
-     * @param privateKeys private keys
+     * @param theKeyPair the key pair that will be serialized
+     * @return the serialized key pair
+     * @throws IOException something went wrong during the process
      */
-    public EllipticCurveKeyPair(final byte[] publicKeys, final byte[] privateKeys) {
-        this.myPublicKey = EllipticCurvePoint.fromByteArray(publicKeys);
-        this.myPrivateBytes = privateKeys;
+    static byte[] toByteArray(final EllipticCurveKeyPair theKeyPair) throws IOException {
+        final ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+        final ObjectOutputStream objectOut = new ObjectOutputStream(streamOut);
+        objectOut.writeObject(theKeyPair);
+        objectOut.flush();
+        return streamOut.toByteArray();
+    }
+
+    /**
+     * Recreate a EllipticCurveKeyPair from a byte array
+     *
+     * @param theKeyPair the serialized key in byte array from
+     * @return the Recreated EllipticCurveKeyPair
+     * @throws IOException            something went wrong during the process
+     * @throws ClassNotFoundException something went wrong during the process
+     */
+    static EllipticCurveKeyPair fromByteArray(final byte[] theKeyPair) throws IOException, ClassNotFoundException {
+        final ByteArrayInputStream theInputStream = new ByteArrayInputStream(theKeyPair);
+        final ObjectInput objectInput = new ObjectInputStream(theInputStream);
+        return (EllipticCurveKeyPair) objectInput.readObject();
     }
 
     /**
      * Getter for the byte array form of the public key.
      *
-     * @return Returns the public key as a byte array.
+     * @return Returns the byte array public key.
      */
-    public byte[] getPublicKey() {
-        return this.myPublicKey.toByteArray();
+    byte[] getPublicKey() {
+        return this.myPublicKey;
     }
 
     /**
      * Getter for the byte array form of the private key.
      *
-     * @return Returns the private key as a byte array.
+     * @return Returns the byte array private key.
      */
-    public byte[] getPrivateKey() {
+    byte[] getPrivateKey() {
         return this.myPrivateBytes;
-    }
-
-    /**
-     * Overriding the equals() method to compare two
-     * EllipticKeyPair objects.
-     *
-     * @param theOther Parameter for the other keyPair to compare to.
-     * @return Returns true if this equals theOther, false if not.
-     */
-    @Override
-    public boolean equals(final Object theOther) {
-        if (this == theOther) {
-            return true;
-        }
-
-        if (theOther == null || getClass() != theOther.getClass()) {
-            return false;
-        }
-
-        final EllipticCurveKeyPair ok = (EllipticCurveKeyPair) theOther;
-
-        return Arrays.equals(myPrivateBytes, ok.myPrivateBytes) && myPublicKey.equals(ok.myPublicKey);
     }
 }
