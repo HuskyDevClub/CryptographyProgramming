@@ -166,3 +166,11 @@ https://github.com/mjosaarinen/tiny_sha3
 NIST.SP.800-185
 
 https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/cSHAKE_samples.pdf
+
+Reference used for implementing Ed448-Goldilocks:
+
+https://ed448goldilocks.sourceforge.net/spec/
+
+https://github.com/otrv4/ed448/tree/master
+
+https://github.com/Realiserad/elliptic-curve-cryptography

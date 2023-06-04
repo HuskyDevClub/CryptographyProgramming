@@ -2,12 +2,12 @@ import java.util.Arrays;
 
 /**
  * Implements the Keccak algorithm from NIST FIPS 202.
- * References https://github.com/mjosaarinen/tiny_sha3 for algorithm implementations as well as
- * https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf and
- * https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf
+ * References <a href="https://github.com/mjosaarinen/tiny_sha3">...</a> for algorithm implementations as well as
+ * <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf">...</a> and
+ * <a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf">...</a>
  * which are NIST FIP 202 and NIST SP 800-185 respectively.
  *
- * @author: Brian LeSmith
+ * @author Brian LeSmith
  */
 final class Keccak {
     //Round constants reference link: https://keccak.team/keccak_specs_summary.html
@@ -162,7 +162,7 @@ final class Keccak {
 
     /**
      * The theta function. Xors each state bit with the parities of two columns in the array.
-     * This was adapted from https://github.com/mjosaarinen/tiny_sha3/blob/master/sha3.c
+     * This was adapted from <a href="https://github.com/mjosaarinen/tiny_sha3/blob/master/sha3.c">...</a>
      *
      * @param stateInput Parameter for the input state, an array of 25 longs.
      * @return Returns the state after the theta function has been applied (array of longs).
@@ -188,7 +188,7 @@ final class Keccak {
 
     /**
      * The rho and phi function. Which shifts and rearranges words.
-     * This was adapted from https://github.com/mjosaarinen/tiny_sha3/blob/master/sha3.c
+     * This was adapted from <a href="https://github.com/mjosaarinen/tiny_sha3/blob/master/sha3.c">...</a>
      *
      * @param stateInput Parameter for the input state, an array of 25 longs.
      * @return Returns the state after applying the rho and phi function.

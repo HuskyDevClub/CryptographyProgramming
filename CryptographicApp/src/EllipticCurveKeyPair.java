@@ -2,6 +2,9 @@ import java.io.*;
 
 /**
  * This class is for storing Elliptic Curve key pair.
+ *
+ * @author Brian LeSmith
+ * @author Yudong Lin
  */
 final class EllipticCurveKeyPair implements Serializable {
     private final byte[] myPublicKey;

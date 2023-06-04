@@ -3,12 +3,14 @@ import java.util.Arrays;
 
 /**
  * This class defines a point on the Elliptic Curve.
+ *
+ * @author Brian LeSmith
+ * @author Yudong Lin
  */
 public class EllipticCurvePoint {
-    public static final EllipticCurvePoint ZERO = new EllipticCurvePoint();
-    public static final BigInteger MARSENNE_PRIME = BigInteger.valueOf(2L).pow(448).subtract(BigInteger.valueOf(2L).pow(224)).subtract(BigInteger.ONE);
-    public static final int STANDARD_BYTE_LENGTH = MARSENNE_PRIME.toByteArray().length * 2;
-    private static final BigInteger DEFINE_E_521 = BigInteger.valueOf(-39081);
+    private static final BigInteger PRIME = BigInteger.valueOf(2L).pow(448).subtract(BigInteger.valueOf(2L).pow(224)).subtract(BigInteger.ONE);
+    public static final int STANDARD_BYTE_LENGTH = PRIME.toByteArray().length * 2;
+    private static final BigInteger DEFINE_E = BigInteger.valueOf(-39081);
     private final BigInteger myX;
     private final BigInteger myY;
 
@@ -21,14 +23,14 @@ public class EllipticCurvePoint {
     }
 
     /**
-     * Initializes a point on the curve using parameter given x and y coordinate.
+     * Initializes a point on the curve using given x and y coordinate.
      *
      * @param theX Parameter for the x coordinate.
      * @param theY Parameter for the y coordinate.
      */
     public EllipticCurvePoint(final BigInteger theX, final BigInteger theY) {
         if (!isValidPair(theX, theY)) {
-            throw new IllegalArgumentException("The provided X, and Y pair is not a point on E_521");
+            throw new IllegalArgumentException("The provided X, and Y pair is not a point on Ed448");
         }
 
         this.myX = theX;
@@ -45,15 +47,15 @@ public class EllipticCurvePoint {
      */
     public EllipticCurvePoint(final BigInteger theX, final boolean theLeastSignificantBit) {
         final BigInteger a = BigInteger.ONE.subtract(theX.pow(2)); // 1 - theX^2
-        final BigInteger b = BigInteger.ONE.subtract(DEFINE_E_521.multiply(theX.pow(2))); // 1 - d * theX^2
-        final BigInteger y = sqrt(a.multiply(b.modInverse(MARSENNE_PRIME)), theLeastSignificantBit); // sqrt( (1 - theX^2) / (1 - dx^2)) mod p
+        final BigInteger b = BigInteger.ONE.subtract(DEFINE_E.multiply(theX.pow(2))); // 1 - d * theX^2
+        final BigInteger y = sqrt(a.multiply(b.modInverse(PRIME)), theLeastSignificantBit); // sqrt( (1 - theX^2) / (1 - dx^2)) mod p
 
         if (y == null) {
             throw new IllegalArgumentException("No square root of the provided theX exists");
         }
 
         this.myX = theX;
-        this.myY = y.mod(MARSENNE_PRIME);
+        this.myY = y.mod(PRIME);
     }
 
     /**
@@ -74,8 +76,7 @@ public class EllipticCurvePoint {
     }
 
     /**
-     * Compute a square root of v mod p with a specified
-     * least significant bit, if such a root exists.
+     * Compute a square root of v mod p with specified the least significant bit, if such a root exists.
      *
      * @param v   the radicand.
      * @param p   the modulus (must satisfy p mod 4 = 3).
@@ -102,7 +103,7 @@ public class EllipticCurvePoint {
      * @return Returns the given point multiplied by the parameter scalar.
      */
     public EllipticCurvePoint scalarMultiply(final BigInteger s) {
-        EllipticCurvePoint V = ZERO;
+        EllipticCurvePoint V = new EllipticCurvePoint();
         final int k = s.bitLength();
         for (int i = k - 1; i >= 0; i--) { // scan over the k bits of s
             V = V.add(V); // invoke the Edwards point addition formula
@@ -125,12 +126,12 @@ public class EllipticCurvePoint {
         final BigInteger xy = myX.multiply(theAddedPoint.myX).multiply(myY.multiply(theAddedPoint.myY));
 
         BigInteger a = myX.multiply(theAddedPoint.myY).add(myY.multiply(theAddedPoint.myX));
-        BigInteger b = BigInteger.ONE.add(DEFINE_E_521.multiply(xy));
-        final BigInteger c = a.multiply(b.modInverse(MARSENNE_PRIME)).mod(MARSENNE_PRIME);
+        BigInteger b = BigInteger.ONE.add(DEFINE_E.multiply(xy));
+        final BigInteger c = a.multiply(b.modInverse(PRIME)).mod(PRIME);
 
         a = myY.multiply(theAddedPoint.myY).subtract(myX.multiply(theAddedPoint.myX));
-        b = BigInteger.ONE.subtract(DEFINE_E_521.multiply(xy));
-        final BigInteger d = a.multiply(b.modInverse(MARSENNE_PRIME)).mod(MARSENNE_PRIME);
+        b = BigInteger.ONE.subtract(DEFINE_E.multiply(xy));
+        final BigInteger d = a.multiply(b.modInverse(PRIME)).mod(PRIME);
 
         return new EllipticCurvePoint(c, d);
     }
@@ -191,12 +192,11 @@ public class EllipticCurvePoint {
             return false;
         }
         final EllipticCurvePoint o = (EllipticCurvePoint) theOther;
-        return myX.equals(o.myX) && myY.equals(o.myY);
+        return myX.equals(o.getX()) && myY.equals(o.getY());
     }
 
     /**
-     * Compute a square root of v mod p with a specified
-     * least significant bit, if such a root exists.
+     * Compute a square root of v mod p with specified the least significant bit, if such a root exists.
      *
      * @param v   the radicand.
      * @param lsb desired least significant bit (true: 1, false: 0).
@@ -204,17 +204,17 @@ public class EllipticCurvePoint {
      * if such a root exists, otherwise null.
      */
     private BigInteger sqrt(final BigInteger v, final boolean lsb) {
-        return sqrt(v, MARSENNE_PRIME, lsb);
+        return sqrt(v, PRIME, lsb);
     }
 
     /**
      * Determines whether the provided X and Y coordinate pair are a point
      * on the curve using the formula:
-     * theX^2 + theY^2 = 1 + d * (theX^2) * theY^2 where d = -376014
+     * theX^2 + theY^2 = 1 + d * (theX^2) * theY^2 where d = -39081
      *
      * @param theX Parameter for the X coordinate.
      * @param theY Parameter for the Y coordinate.
-     * @return Returns a boolean flag for if the pair is on E_521.
+     * @return Returns a boolean flag for if the pair is on ED448.
      */
     private boolean isValidPair(final BigInteger theX, final BigInteger theY) {
         final BigInteger left;
@@ -224,8 +224,8 @@ public class EllipticCurvePoint {
             right = BigInteger.ONE;
             left = BigInteger.ONE;
         } else {
-            left = theX.pow(2).add(theY.pow(2)).mod(MARSENNE_PRIME);
-            right = BigInteger.ONE.add(DEFINE_E_521.multiply(theX.pow(2).multiply(theY.pow(2)))).mod(MARSENNE_PRIME);
+            left = theX.pow(2).add(theY.pow(2)).mod(PRIME);
+            right = BigInteger.ONE.add(DEFINE_E.multiply(theX.pow(2).multiply(theY.pow(2)))).mod(PRIME);
         }
 
         return left.equals(right);
