@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class EllipticCurves {
 
-    final static int Z_LEN = 64;
     final static int T_LEN = 64;
     private final static BigInteger BIG_INT_FOUR = BigInteger.valueOf(4L);
     private static final EllipticCurvePoint G = new EllipticCurvePoint(BigInteger.valueOf(4L), false);
@@ -45,7 +44,7 @@ public class EllipticCurves {
     }
 
     static byte[] encrypt(final byte[] m, final byte[] V) {
-        var k = new BigInteger(Glossary.random(Z_LEN * 8));
+        var k = new BigInteger(Glossary.random(512));
         k = k.multiply(BIG_INT_FOUR).mod(EllipticCurvePoint.R);
         final var W = EllipticCurvePoint.fromByteArray(V).scalarMultiply(k);
         final var Z = G.scalarMultiply(k);
@@ -63,7 +62,7 @@ public class EllipticCurves {
 
     static byte[] decrypt(final byte[] data, final byte[] pw) {
         // obtain z, c and t from data
-        final byte[] Z = Arrays.copyOfRange(data, 0, Z_LEN);
+        final byte[] Z = Arrays.copyOfRange(data, 0, EllipticCurvePoint.STANDARD_BYTE_LENGTH);
         final byte[] c = Arrays.copyOfRange(data, Z.length, data.length - T_LEN);
         final byte[] t = Arrays.copyOfRange(data, Z.length + c.length, data.length);
 

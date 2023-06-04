@@ -9,7 +9,7 @@ public class EllipticCurvePoint {
     public static final BigInteger R = BigInteger.valueOf(2L).pow(446)
             .subtract(new BigInteger("13818066809895115352007386748515426880336692474882178609894547503885"));
     public static final BigInteger MARSENNE_PRIME = BigInteger.valueOf(2L).pow(448).subtract(BigInteger.valueOf(2L).pow(224)).subtract(BigInteger.ONE);
-    private static final int STANDARD_BYTE_LENGTH = MARSENNE_PRIME.toByteArray().length * 2;
+    public static final int STANDARD_BYTE_LENGTH = MARSENNE_PRIME.toByteArray().length * 2;
     private static final BigInteger DEFINE_E_521 = BigInteger.valueOf(-39081);
     private final BigInteger myX;
     private final BigInteger myY;
