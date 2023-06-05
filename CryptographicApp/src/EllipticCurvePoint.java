@@ -7,9 +7,10 @@ import java.util.Arrays;
  * @author Brian LeSmith
  * @author Yudong Lin
  */
-public class EllipticCurvePoint {
-    private static final BigInteger PRIME = BigInteger.valueOf(2L).pow(448).subtract(BigInteger.valueOf(2L).pow(224)).subtract(BigInteger.ONE);
-    public static final int STANDARD_BYTE_LENGTH = PRIME.toByteArray().length * 2;
+final class EllipticCurvePoint {
+    private static final BigInteger PRIME = BigInteger.valueOf(2L).pow(448)
+            .subtract(BigInteger.valueOf(2L).pow(224)).subtract(BigInteger.ONE);
+    static final int STANDARD_BYTE_LENGTH = PRIME.toByteArray().length * 2;
     private static final BigInteger DEFINE_E = BigInteger.valueOf(-39081);
     private final BigInteger myX;
     private final BigInteger myY;
@@ -17,7 +18,7 @@ public class EllipticCurvePoint {
     /**
      * Initializes a point for the neutral element.
      */
-    public EllipticCurvePoint() {
+    EllipticCurvePoint() {
         this.myX = BigInteger.ZERO;
         this.myY = BigInteger.ONE;
     }
@@ -28,8 +29,8 @@ public class EllipticCurvePoint {
      * @param theX Parameter for the x coordinate.
      * @param theY Parameter for the y coordinate.
      */
-    public EllipticCurvePoint(final BigInteger theX, final BigInteger theY) {
-        if (!isValidPair(theX, theY)) {
+    EllipticCurvePoint(final BigInteger theX, final BigInteger theY) {
+        if (!isValid(theX, theY)) {
             throw new IllegalArgumentException("The provided X, and Y pair is not a point on Ed448");
         }
 
@@ -45,7 +46,7 @@ public class EllipticCurvePoint {
      * @param theX                   Parameter for the x coordinate.
      * @param theLeastSignificantBit Parameter for the desired least significant bit of the y coordinate.
      */
-    public EllipticCurvePoint(final BigInteger theX, final boolean theLeastSignificantBit) {
+    EllipticCurvePoint(final BigInteger theX, final boolean theLeastSignificantBit) {
         final BigInteger a = BigInteger.ONE.subtract(theX.pow(2)); // 1 - theX^2
         final BigInteger b = BigInteger.ONE.subtract(DEFINE_E.multiply(theX.pow(2))); // 1 - d * theX^2
         final BigInteger y = sqrt(a.multiply(b.modInverse(PRIME)), theLeastSignificantBit); // sqrt( (1 - theX^2) / (1 - dx^2)) mod p
@@ -64,7 +65,7 @@ public class EllipticCurvePoint {
      * @param theDesiredCurvePoint Parameter for the byte array representing the desired CurvePoint.
      * @return Returns a CurvePoint parsed from the byte array.
      */
-    public static EllipticCurvePoint fromByteArray(final byte[] theDesiredCurvePoint) {
+    static EllipticCurvePoint fromByteArray(final byte[] theDesiredCurvePoint) {
         if (theDesiredCurvePoint.length != STANDARD_BYTE_LENGTH) {
             throw new IllegalArgumentException("The provided byte array is not formatted properly.");
         }
@@ -79,21 +80,20 @@ public class EllipticCurvePoint {
      * Compute a square root of v mod p with specified the least significant bit, if such a root exists.
      *
      * @param v   the radicand.
-     * @param p   the modulus (must satisfy p mod 4 = 3).
      * @param lsb desired least significant bit (true: 1, false: 0).
      * @return a square root r of v mod p with r mod 2 = 1 iff lsb = true
      * if such a root exists, otherwise null.
      */
-    public static BigInteger sqrt(final BigInteger v, final BigInteger p, final boolean lsb) {
-        assert (p.testBit(0) && p.testBit(1)); // p = 3 (mod 4)
+    private static BigInteger sqrt(final BigInteger v, final boolean lsb) {
+        assert (PRIME.testBit(0) && PRIME.testBit(1)); // p = 3 (mod 4)
         if (v.signum() == 0) {
             return BigInteger.ZERO;
         }
-        BigInteger r = v.modPow(p.shiftRight(2).add(BigInteger.ONE), p);
+        BigInteger r = v.modPow(PRIME.shiftRight(2).add(BigInteger.ONE), PRIME);
         if (r.testBit(0) != lsb) {
-            r = p.subtract(r); // correct the lsb
+            r = PRIME.subtract(r); // correct the lsb
         }
-        return (r.multiply(r).subtract(v).mod(p).signum() == 0) ? r : null;
+        return (r.multiply(r).subtract(v).mod(PRIME).signum() == 0) ? r : null;
     }
 
     /**
@@ -102,7 +102,7 @@ public class EllipticCurvePoint {
      * @param s Parameter for the scalar to multiply by.
      * @return Returns the given point multiplied by the parameter scalar.
      */
-    public EllipticCurvePoint scalarMultiply(final BigInteger s) {
+    EllipticCurvePoint scalarMultiply(final BigInteger s) {
         EllipticCurvePoint V = new EllipticCurvePoint();
         final int k = s.bitLength();
         for (int i = k - 1; i >= 0; i--) { // scan over the k bits of s
@@ -122,7 +122,7 @@ public class EllipticCurvePoint {
      * @param theAddedPoint Parameter for the point to add.
      * @return Returns this + theAddedPoint (based upon the formula described above)
      */
-    public EllipticCurvePoint add(final EllipticCurvePoint theAddedPoint) {
+    EllipticCurvePoint add(final EllipticCurvePoint theAddedPoint) {
         final BigInteger xy = myX.multiply(theAddedPoint.myX).multiply(myY.multiply(theAddedPoint.myY));
 
         BigInteger a = myX.multiply(theAddedPoint.myY).add(myY.multiply(theAddedPoint.myX));
@@ -141,7 +141,7 @@ public class EllipticCurvePoint {
      *
      * @return Returns an unambiguous byte array representation of this curve point.
      */
-    public byte[] toByteArray() {
+    byte[] toByteArray() {
         final byte[] asBytes = new byte[STANDARD_BYTE_LENGTH];
         final byte[] xBytes = myX.toByteArray();
         final byte[] yBytes = myY.toByteArray();
@@ -167,7 +167,7 @@ public class EllipticCurvePoint {
      *
      * @return Returns the myX variable.
      */
-    public BigInteger getX() {
+    BigInteger getX() {
         return this.myX;
     }
 
@@ -176,7 +176,7 @@ public class EllipticCurvePoint {
      *
      * @return Returns the myY variable.
      */
-    public BigInteger getY() {
+    BigInteger getY() {
         return this.myY;
     }
 
@@ -196,18 +196,6 @@ public class EllipticCurvePoint {
     }
 
     /**
-     * Compute a square root of v mod p with specified the least significant bit, if such a root exists.
-     *
-     * @param v   the radicand.
-     * @param lsb desired least significant bit (true: 1, false: 0).
-     * @return a square root r of v mod p with r mod 2 = 1 iff lsb = true
-     * if such a root exists, otherwise null.
-     */
-    private BigInteger sqrt(final BigInteger v, final boolean lsb) {
-        return sqrt(v, PRIME, lsb);
-    }
-
-    /**
      * Determines whether the provided X and Y coordinate pair are a point
      * on the curve using the formula:
      * theX^2 + theY^2 = 1 + d * (theX^2) * theY^2 where d = -39081
@@ -216,18 +204,12 @@ public class EllipticCurvePoint {
      * @param theY Parameter for the Y coordinate.
      * @return Returns a boolean flag for if the pair is on ED448.
      */
-    private boolean isValidPair(final BigInteger theX, final BigInteger theY) {
-        final BigInteger left;
-        final BigInteger right;
-
+    private boolean isValid(final BigInteger theX, final BigInteger theY) {
         if (theX.equals(BigInteger.ZERO) && theY.equals(BigInteger.ONE)) {
-            right = BigInteger.ONE;
-            left = BigInteger.ONE;
-        } else {
-            left = theX.pow(2).add(theY.pow(2)).mod(PRIME);
-            right = BigInteger.ONE.add(DEFINE_E.multiply(theX.pow(2).multiply(theY.pow(2)))).mod(PRIME);
+            return true;
         }
-
+        final BigInteger left = theX.pow(2).add(theY.pow(2)).mod(PRIME);
+        final BigInteger right = BigInteger.ONE.add(DEFINE_E.multiply(theX.pow(2).multiply(theY.pow(2)))).mod(PRIME);
         return left.equals(right);
     }
 }

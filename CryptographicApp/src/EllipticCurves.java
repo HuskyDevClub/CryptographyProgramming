@@ -36,7 +36,6 @@ public class EllipticCurves {
         for (int i = 0; i < 100; i++) {
             final BigInteger k = new BigInteger(Glossary.random(512)).multiply(BIG_INT_FOUR).mod(R);
             final BigInteger t = new BigInteger(Glossary.random(512)).multiply(BIG_INT_FOUR).mod(R);
-            // k*G = (k mod r)*G
             assertEquals(G.scalarMultiply(k), G.scalarMultiply(k.mod(R)));
             assertEquals(G.scalarMultiply(k.add(BigInteger.ONE)), G.scalarMultiply(k).add(G));
             assertEquals(G.scalarMultiply(k.add(t)), G.scalarMultiply(k).add(G.scalarMultiply(t)));
