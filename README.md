@@ -1,12 +1,14 @@
 # An implementation based on NIST.SP.800-185
 
 Algorithms:
-• SHA-3 derived function KMACXOF256;
-• ECDHIES encryption and Schnorr signatures;
-• DHIES encryption and Schnorr signatures with elliptic curves
+- SHA-3 derived function KMACXOF256
+- ECDHIES encryption and Schnorr signatures
+- DHIES encryption and Schnorr signatures with elliptic curves
 
 Objective: implement (in Java) a library and an app for asymmetric encryption and digital signatures at the 256-bit
 security level
+
+
 
 # Developed By:
 
@@ -20,6 +22,8 @@ security level
 
 - The implementation of cSHAKE256
 - The implementation of Ed448-Goldilocks
+
+
 
 # What this program will do:
 
@@ -49,6 +53,8 @@ security level
 6. Sign a given file from a given password and write the signature to a file.
 7. Sign text input by the user directly to the app instead of having to read it from a file (but write the signature to a file).
 8. Verify a given data file and its signature file under a given public key file.
+
+
 
 # How to use:
 
@@ -96,36 +102,6 @@ local disk.
 
 ### Elliptic curves:
 
-#### Services the app must offer for part 2:
-
-**Generate an elliptic key pair from a given passphrase and write the public key to a file (and also encrypt the private key from that pair under the given password and write it to a different file as well):**
-
-`-eck -p testpw -o public.key -o2 private.key` -- generate an elliptic key pair from the given passphrase "testpw" and write the public key to "public.key" file and ***encrypted*** private key to "private.key" file.
-
-**Encrypt a data file under a given elliptic public key file and write the ciphertext to a file:**
-
-`-ece -f test.txt -keyp public.key -o test.txt.enc` -- the program will encrypt the "test.txt" file using previously generated "public.key" file, and then save to "test.txt.enc" file.
-
-**Encrypt text input by the user directly to the app instead of having to read it from a file (but write the ciphertext to a file).**
-
-`-ece -keyp public.key -o test.txt.enc` -- you will be asked to input a string which will be encrypted using previously generated "public.key" file, and then save to "test.txt.enc" file.
-
-**Decrypt a given elliptic-encrypted file from a given password and write the decrypted data to a file.**
-
-`-ecd -f test.txt.enc -p testpw -o test.txt` -- the program will decrypt "test.txt.enc" file with the passphrase "testpw", and then save to "test.txt"
-
-**Sign a given file from a given password and write the signature to a file:**
-
-`-ecs -f test.txt -p testpw -o test_signature.key` -- the program will sign the "test.txt" file with the passphrase "testpw", and write the signature to "test_signature.key" file.
-
-**Sign text input by the user directly to the app instead of having to read it from a file (but write the signature to a file):**
-
-`-ecs -p testpw -o test_signature.key` -- you will be asked to input a string which will be signed using passphrase "testpw", and write the signature to "test_signature.key" file.
-
-**Verifying a signature (h, z) for a byte array m under the (Schnorr/ DHIES) public key V:**
-
-`-ecv -f test.txt -o test_signature.key -keyp public.key` -- Verify "test.txt" file and its signature file "test_signature.key" under "public.key" file.
-
 #### Generate an elliptic key pair:
 
 `-eck -p <passphrase> -o <public key output path> -o2 <private key output path> ` -- generate an elliptic key pair from a given passphrase and write the public key and encrypted private key to given location.
@@ -167,12 +143,16 @@ path with the given public key, and then save to given location
 
 `-ecv -f <input data file path> -o <signature file path> -keyp <public key file path>` -- Verify a given data file and its signature file under a given public key file.
 
-
-
-#### Please Note that:
+#### Please Note:
 
 > The mode argument such as "-h" or "-t" has to be entered as the first argument! The other arguments can be entered
 > in different orders, but following the order listed above are highly recommended!
+
+
+
+# License 
+
+Please check the **LICENSE** file. You are free to learn and use any part of this repo. However, giving us credits is always a requirement! **You are mandated to include an explicit link to this repo**! We reserve the right to notify your professor or take legal action if needed.
 
 
 
